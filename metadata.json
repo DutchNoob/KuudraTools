@@ -1,0 +1,14 @@
+{
+  "$schema": "../../CTAutocomplete/schema.json",
+  "creator": "DutchNoob",
+  "author": "DutchNoob",
+  "entry": "index.js",
+  "description": "KuudraTools",
+  "name": "KuudraTools",
+  "version": "0.0.1",
+  "versionId": 1,
+  "requires": [
+	"Vigilance",
+	"requestV2"
+  ]
+}

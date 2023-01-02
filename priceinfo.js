@@ -65,30 +65,27 @@ var equipmentList = [
 
 export function getLowestPriceForAttributes(types) {
 	mSearchType = mSearchType_DUAL
-	mPage = 0
 	mTypesSelected = types
 	mTierSelected = 0
-	initStructs()
+	init()
 	ChatLib.chat(COLOR_GREEN + `Starting price info type ` + COLOR_DARK_PURPLE + types[0] + ` ` + types[1]);
 	parseAuctions()
 }
 
 export function getLowestPriceForAttributeLevel(types, tier) {
 	mSearchType = mSearchType_LOWEST
-	mPage = 0
 	mTypesSelected = types
 	mTierSelected = tier
-	initStructs()
+	init()
 	ChatLib.chat(COLOR_GREEN + `Starting price info type ` + COLOR_DARK_PURPLE  + types + ` tier ` + tier);
 	parseAuctions()
 }
 
 export function getShardPrices(tier) {
 	mSearchType = mSearchType_SHARDS
-	mPage = 0
 	mTypesSelected = ""
 	mTierSelected = tier
-	initStructs()
+	init()
 	ChatLib.chat(COLOR_GREEN + `Starting price info ` + COLOR_DARK_PURPLE  + `tier ` + tier);
 	parseAuctions()
 }
@@ -112,6 +109,7 @@ function init() {
 		it[1] = [0, 0, 0, 0]
 		it[2] = []
 	})
+	mPage = 0
 }
 
 function parseAuctions() {

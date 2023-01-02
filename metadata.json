@@ -5,7 +5,7 @@
   "entry": "index.js",
   "description": "KuudraTools",
   "name": "KuudraTools",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "versionId": 1,
   "requires": [
 	"Vigilance",

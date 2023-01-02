@@ -57,13 +57,3 @@ export function decompress(compressed) {
     }
     return new NBTTagCompound(CompressedStreamTools.func_74796_a(new ByteArrayInputStream(Base64.getDecoder().decode(compressed))))
 }
-
-export const sortLowToHigh = (arrayItemA, arrayItemB) => {
-	if (arrayItemA[AUCTION_PRICE] < arrayItemB[AUCTION_PRICE]) {
-		return -1
-	}
-	if (arrayItemA[AUCTION_PRICE] > arrayItemB[AUCTION_PRICE]) {
-		return 1
-	}
-	return 0
-}

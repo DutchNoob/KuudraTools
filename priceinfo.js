@@ -1,6 +1,6 @@
 import settings from "./settings"
 import request from "../requestV2"
-import { decompress, sortLowToHigh } from "./utils"
+import { decompress } from "./utils"
 import { COLOR_DARK_BLACK, COLOR_DARK_BLUE, COLOR_DARK_GREEN, COLOR_DARK_AQUA, COLOR_DARK_RED } from "./utils"
 import { COLOR_DARK_PURPLE, COLOR_GOLD, COLOR_GRAY, COLOR_DARK_GRAY, COLOR_BLUE, COLOR_GREEN, COLOR_AQUA } from "./utils"
 import { COLOR_RED, COLOR_LIGHT_PURPLE, COLOR_YELLOW, COLOR_WHITE } from "./utils"
@@ -216,7 +216,7 @@ function parseAuctions() {
 			shardList.forEach(function(it) {
 				var i = 0
 				if (it[0].equals(mTypesSelected)) {
-					it[2].sort(sortLowToHigh)
+					it[2].sort((a, b) => a[AUCTION_PRICE] - b[AUCTION_PRICE])
 					it[2].every(function(it2) {
 						new Message(
 							new TextComponent(COLOR_AQUA + `Attribute Shard ` + it[0] + ` ` + mTierSelected + ` ` + COLOR_YELLOW + (it2[AUCTION_PRICE] / 1000000).toFixed(2) + `m`)
@@ -232,7 +232,7 @@ function parseAuctions() {
 			})
 			tierOnlyList.forEach(function(it) {
 				var i = 0
-				it[1].sort(sortLowToHigh)
+				it[1].sort((a, b) => a[AUCTION_PRICE] - b[AUCTION_PRICE])
 				it[1].every(function(it2) {
 					new Message(
 						new TextComponent(COLOR_AQUA + it2[AUCTION_NAME] + ` ` + COLOR_YELLOW + (it2[AUCTION_PRICE] / 1000000).toFixed(2) + `m`)
@@ -247,7 +247,7 @@ function parseAuctions() {
 			})
 			equipmentList.forEach(function(it) {
 				var i = 0
-				it[2].sort(sortLowToHigh)
+				it[2].sort((a, b) => a[AUCTION_PRICE] - b[AUCTION_PRICE])
 				it[2].every(function(it2) {
 					new Message(
 						new TextComponent(COLOR_AQUA + it2[AUCTION_NAME] + ` ` + COLOR_YELLOW + (it2[AUCTION_PRICE] / 1000000).toFixed(2) + `m`)
@@ -269,7 +269,7 @@ function parseAuctions() {
 				FORMAT_RESET + FORMAT_OBFUSCATED + FORMAT_BOLD + `!!!`)
 			shardList.forEach(function(it) {
 				var i = 0
-				it[2].sort(sortLowToHigh)
+				it[2].sort((a, b) => a[AUCTION_PRICE] - b[AUCTION_PRICE])
 				it[2].every(function(it2) {
 					new Message(
 						new TextComponent(COLOR_AQUA + `Attribute Shard ` + it[0] + ` ` + mTierSelected + ` ` + COLOR_YELLOW + (it2[AUCTION_PRICE] / 1000000).toFixed(2) + `m`)

@@ -93,8 +93,8 @@ export function getShardPrices(tier) {
 	parseAuctions()
 }
 
-function initStructs() {
-	dualAttributesList.forEach(function(it) {
+function init() {
+	dualAttributesList.forEach(it => {
 		it[1] = [
 			[0, 0, 0, 0],
 			[0, 0, 0, 0],
@@ -102,13 +102,13 @@ function initStructs() {
 			[0, 0, 0, 0]
 		]
 	})
-	tierOnlyList.forEach(function(it) {
+	tierOnlyList.forEach(it => {
 		it[1] = []
 	})
-	shardList.forEach(function(it) {
+	shardList.forEach(it => {
 		it[2] = []
 	})
-	equipmentList.forEach(function(it) {
+	equipmentList.forEach(it => {
 		it[1] = [0, 0, 0, 0]
 		it[2] = []
 	})
@@ -132,13 +132,11 @@ function parseAuctions() {
 				}
 				if (auction.item_name.equals("Attribute Shard")) {
 					let str = ChatLib.removeFormatting(auction.item_lore).split(/\n/)[0].replace(/[^a-zA-Z ]/g, "")
-					shardList.forEach(function(it) {
+					shardList.forEach(it => {
 						if (str.includes(it[1])) {
-							if (str.includes(it[1])) {
-								let s = str.split(it[1])[1].replaceAll(" ", "")
-								if (s.length == mTierSelected) {
-									it[2].push([auction.uuid, auction.item_name, auction.starting_bid, lore])
-								}
+							let s = str.split(it[1])[1].replaceAll(" ", "")
+							if (s.length == mTierSelected) {
+								it[2].push([auction.uuid, auction.item_name, auction.starting_bid, lore])
 							}
 						}
 					})
@@ -151,13 +149,13 @@ function parseAuctions() {
 					}
 					if (add == wantedLevel) {
 						if (mTierSelected != 0) {
-							tierOnlyList.forEach(function(it) {
+							tierOnlyList.forEach(it => {
 								if (auction.item_name.includes(it[0])) {
 									it[1].push([auction.uuid, auction.item_name, auction.starting_bid, lore])
 								}
 							})
 						} else {
-							dualAttributesList.forEach(function(it) {
+							dualAttributesList.forEach(it => {
 								if (auction.item_name.includes(it[0])) {
 									if (auction.item_name.includes("Crimson")) {
 										if (auction.starting_bid < it[1][TYPE_CRIMSON][AUCTION_PRICE] || it[1][TYPE_CRIMSON][AUCTION_PRICE] == 0) {
@@ -181,7 +179,7 @@ function parseAuctions() {
 						}
 					}
 				}
-				equipmentList.forEach(function(it) {
+				equipmentList.forEach(it => {
 					if (itemObj[0].tag.ExtraAttributes.id.includes(it[0])) {
 						var add = checkAttributePresent(itemObj[0])
 						var wantedLevel = 1
@@ -213,7 +211,7 @@ function parseAuctions() {
 			ChatLib.chat(FORMAT_OBFUSCATED + FORMAT_BOLD + `!!!` + FORMAT_RESET +
 				COLOR_AQUA +` Auctions for ` + COLOR_DARK_PURPLE + FORMAT_BOLD + mTypesSelected + ` ` + mTierSelected + ` ` +
 				FORMAT_RESET + FORMAT_OBFUSCATED + FORMAT_BOLD + `!!!`)
-			shardList.forEach(function(it) {
+			shardList.forEach(it => {
 				var i = 0
 				if (it[0].equals(mTypesSelected)) {
 					it[2].sort((a, b) => a[AUCTION_PRICE] - b[AUCTION_PRICE])
@@ -230,7 +228,7 @@ function parseAuctions() {
 					ChatLib.chat("")
 				}
 			})
-			tierOnlyList.forEach(function(it) {
+			tierOnlyList.forEach(it => {
 				var i = 0
 				it[1].sort((a, b) => a[AUCTION_PRICE] - b[AUCTION_PRICE])
 				it[1].every(function(it2) {
@@ -245,7 +243,7 @@ function parseAuctions() {
 				})
 				ChatLib.chat("")
 			})
-			equipmentList.forEach(function(it) {
+			equipmentList.forEach(it => {
 				var i = 0
 				it[2].sort((a, b) => a[AUCTION_PRICE] - b[AUCTION_PRICE])
 				it[2].every(function(it2) {
@@ -267,7 +265,7 @@ function parseAuctions() {
 			ChatLib.chat(FORMAT_OBFUSCATED + FORMAT_BOLD + `!!!` + FORMAT_RESET +
 				COLOR_AQUA +` Auctions for ` + COLOR_DARK_PURPLE + FORMAT_BOLD + `Tier ` + mTierSelected + ` ` +
 				FORMAT_RESET + FORMAT_OBFUSCATED + FORMAT_BOLD + `!!!`)
-			shardList.forEach(function(it) {
+			shardList.forEach(it => {
 				var i = 0
 				it[2].sort((a, b) => a[AUCTION_PRICE] - b[AUCTION_PRICE])
 				it[2].every(function(it2) {
@@ -288,7 +286,7 @@ function parseAuctions() {
 		ChatLib.chat(FORMAT_OBFUSCATED + FORMAT_BOLD + `!!!` + FORMAT_RESET +
 			COLOR_AQUA +` Auctions for ` + COLOR_DARK_PURPLE + FORMAT_BOLD + mTypesSelected[0] + ` ` + mTypesSelected[1] + ` ` +
 			FORMAT_RESET + FORMAT_OBFUSCATED + FORMAT_BOLD + `!!!`)
-		dualAttributesList.forEach(function(it) {
+		dualAttributesList.forEach(it => {
 			for (let i = 0; i < 4; i++) {
 				if (it[1][i][AUCTION_PRICE] != 0) {
 					var it2 = it[1][i]
@@ -301,7 +299,7 @@ function parseAuctions() {
 			}
 			ChatLib.chat("")
 		})
-		equipmentList.forEach(function(it) {
+		equipmentList.forEach(it => {
 			if (it[1][AUCTION_PRICE] != 0) {
 				new Message(
 					new TextComponent(COLOR_AQUA + it[1][AUCTION_NAME] + ` ` + COLOR_YELLOW + (it[1][AUCTION_PRICE] / 1000000).toFixed(2) + `m`)

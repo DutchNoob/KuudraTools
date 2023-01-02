@@ -59,8 +59,10 @@ var equipmentList = [
 	["GHAST_CLOAK", [], []],
 	["MOLTEN_BELT", [], []],
 	["BLAZE_BELT", [], []],
+	["IMPLOSION_BELT", [], []],
 	["MOLTEN_BRACELET", [], []],
-	["GLOWSTONE_GAUNTLET", [], []]
+	["GLOWSTONE_GAUNTLET", [], []],
+	["GAUNTLET_OF_CONTAGION", [], []]
 ]
 
 export function getLowestPriceForAttributes(types) {

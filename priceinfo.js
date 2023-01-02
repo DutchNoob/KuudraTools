@@ -32,9 +32,9 @@ const validAttributes = [
 	["SP", "speed"],
 	["FO", "fortitude"],
 	["AR", "arachno_resistance"],
-	["BR", "blazing_resistance"],
-	["ER", "ender_resistance"],
-	["UR", "undead_resistance"]
+	["BL", "blazing_resistance"],
+	["EN", "ender_resistance"],
+	["UN", "undead_resistance"]
 ]
 
 const armorpieces = [
@@ -71,9 +71,9 @@ var shardList = [
 	["SP", "speed", []],
 	["FO", "fortitude", []],
 	["AR", "arachno_resistance", []],
-	["BR", "blazing_resistance", []],
-	["ER", "ender_resistance", []],
-	["UR", "undead_resistance", []]
+	["BL", "blazing_resistance", []],
+	["EN", "ender_resistance", []],
+	["UN", "undead_resistance", []]
 
 ]
 

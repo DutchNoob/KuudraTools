@@ -20,7 +20,21 @@ const mSearchType_SHARDS = 2
 var mSearchType
 
 const validAttributes = [
-	"MP", "MR", "DOM", "VET", "VIT", "MF"
+	["MP", "mana_pool"],
+	["MR", "mana_regeneration"],
+	["DO", "dominance"],
+	["VE", "veteran"],
+	["VI", "mending"],
+	["MF", "magic_find"],
+	["BR", "breeze"],
+	["LR", "life_regeneration"],
+	["LL", "lifeline"],
+	["SP", "speed"],
+	["FO", "fortitude"],
+	["AR", "arachno_resistance"],
+	["BR", "blazing_resistance"],
+	["ER", "ender_resistance"],
+	["UR", "undead_resistance"]
 ]
 
 const armorpieces = [
@@ -45,11 +59,22 @@ var tierOnlyList = [
 ]
 
 var shardList = [
-	["MP", "Mana Pool", []],
-	["DOM", "Dominance", []],
-	["VIT", "Vitality", []],
-	["MR", "Mana Regeneration", []],
-	["VET", "Veteran", []]
+	["MP", "mana_pool", []],
+	["MR", "mana_regeneration", []],
+	["DO", "dominance", []],
+	["VE", "veteran", []],
+	["VI", "mending", []],
+	["MF", "magic_find", []],
+	["BR", "breeze", []],
+	["LR", "life_regeneration", []],
+	["LL", "lifeline", []],
+	["SP", "speed", []],
+	["FO", "fortitude", []],
+	["AR", "arachno_resistance", []],
+	["BR", "blazing_resistance", []],
+	["ER", "ender_resistance", []],
+	["UR", "undead_resistance", []]
+
 ]
 
 var equipmentList = [
@@ -131,18 +156,14 @@ function parseAuctions() {
 					lore += itemObj[0].tag.display.Lore[j] + "\n"
 				}
 				if (auction.item_name.equals("Attribute Shard")) {
-					let str = ChatLib.removeFormatting(auction.item_lore).split(/\n/)[0].replace(/[^a-zA-Z ]/g, "")
 					shardList.forEach(it => {
-						if (str.includes(it[1])) {
-							let s = str.split(it[1])[1].replaceAll(" ", "")
-							if (s.length == mTierSelected) {
-								it[2].push([auction.uuid, auction.item_name, auction.starting_bid, lore])
-							}
+						if (checkAttributePresent(itemObj[0], it[0]) == 1) {
+							it[2].push([auction.uuid, auction.item_name, auction.starting_bid, lore])
 						}
 					})
 				}
 				if (armorpieces.some(s => auction.item_name.includes(s))) {
-					var add = checkAttributePresent(itemObj[0])
+					var add = checkAttributePresent(itemObj[0], mTypesSelected)
 					var wantedLevel = 1
 					if (mTierSelected == 0) {
 						wantedLevel = 2
@@ -181,7 +202,7 @@ function parseAuctions() {
 				}
 				equipmentList.forEach(it => {
 					if (itemObj[0].tag.ExtraAttributes.id.includes(it[0])) {
-						var add = checkAttributePresent(itemObj[0])
+						var add = checkAttributePresent(itemObj[0], mTypesSelected)
 						var wantedLevel = 1
 						if (mTierSelected == 0) {
 							wantedLevel = 2
@@ -318,46 +339,33 @@ function parseAuctions() {
     })
 }
 
-function checkAttributePresent(obj) {
+function checkAttributePresent(obj, selectedTypes) {
 	var add = 0
-	if (obj && obj.tag  && obj.tag.ExtraAttributes) {
-		if (obj.tag.ExtraAttributes.attributes.mana_pool != undefined && mTypesSelected.includes("MP")) {
-			if (obj.tag.ExtraAttributes.attributes.mana_pool == mTierSelected || mTierSelected == 0) {
-				add += 1
+	if (obj && obj.tag  && obj.tag.ExtraAttributes && obj.tag.ExtraAttributes.attributes) {
+		validAttributes.forEach(it => {
+			if (selectedTypes.includes(it[0])) {
+				if (obj.tag.ExtraAttributes.attributes.hasOwnProperty(it[1])) {
+					if (obj.tag.ExtraAttributes.attributes[it[1]] == mTierSelected || mTierSelected == 0) {
+						add += 1
+					}
+				}
 			}
-		}
-		if (obj.tag.ExtraAttributes.attributes.dominance != undefined && mTypesSelected.includes("DOM")) {
-			if (obj.tag.ExtraAttributes.attributes.dominance == mTierSelected || mTierSelected == 0) {
-				add += 1
-			}
-		}
-		if (obj.tag.ExtraAttributes.attributes.mana_regeneration != undefined && mTypesSelected.includes("MR")) {
-			if (obj.tag.ExtraAttributes.attributes.mana_regeneration == mTierSelected || mTierSelected == 0) {
-				add += 1
-			}
-		}
-		if (obj.tag.ExtraAttributes.attributes.veteran != undefined && mTypesSelected.includes("VET")) {
-			if (obj.tag.ExtraAttributes.attributes.veteran == mTierSelected || mTierSelected == 0) {
-				add += 1
-			}
-		}
-		if (obj.tag.ExtraAttributes.attributes.mending != undefined && mTypesSelected.includes("VIT")) {
-			if (obj.tag.ExtraAttributes.attributes.mending == mTierSelected || mTierSelected == 0) {
-				add += 1
-			}
-		}
-		if (obj.tag.ExtraAttributes.attributes.magic_find != undefined && mTypesSelected.includes("MF")) {
-			if (obj.tag.ExtraAttributes.attributes.magic_find == mTierSelected || mTierSelected == 0) {
-				add += 1
-			}
-		}
+		})
 	}
 	return add
 }
 
 export function isValidAttribute(attr) {
-	if (validAttributes.some(s => attr.equals(s))) {
+	if (validAttributes.some(s => attr.equals(s[0]))) {
 		return true
 	}
 	return false
+}
+
+export function showValidAttribute(attr) {
+	var ret = ""
+	validAttributes.forEach(it => {
+		ret += it[0] + " "
+	})
+	return ret
 }

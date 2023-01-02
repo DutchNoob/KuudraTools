@@ -4,7 +4,7 @@ import { COLOR_DARK_PURPLE, COLOR_GOLD, COLOR_GRAY, COLOR_DARK_GRAY, COLOR_BLUE,
 import { COLOR_RED, COLOR_LIGHT_PURPLE, COLOR_YELLOW, COLOR_WHITE } from "./utils"
 import { FORMAT_OBFUSCATED, FORMAT_BOLD, FORMAT_STRIKETHROUGH, FORMAT_UNDERLINE, FORMAT_ITALIC, FORMAT_RESET } from "./utils"
 import { getPlayerInfo } from "./playerinfo"
-import { getLowestPriceForAttributes, getLowestPriceForAttributeLevel, getShardPrices, isValidAttribute } from "./priceinfo"
+import { getLowestPriceForAttributes, getLowestPriceForAttributeLevel, getShardPrices, isValidAttribute, showValidAttribute } from "./priceinfo"
 
 
 
@@ -65,5 +65,5 @@ function showHelp() {
 	ChatLib.chat(COLOR_GOLD + `level ` + COLOR_GRAY + `lowest shard prices for the tier`);
 	ChatLib.chat(COLOR_GOLD + `attributes + attributes: ` + COLOR_GRAY + `returns lowest per type`);
 	ChatLib.chat(COLOR_GOLD + `attributes + level: ` + COLOR_GRAY + `returns cheapest auctions`);
-	ChatLib.chat(COLOR_GOLD + `attributes: ` + COLOR_GRAY + `MP MR DOM VET VIT MF`);
+	ChatLib.chat(COLOR_GOLD + `attributes: ` + COLOR_GRAY + showValidAttribute());
 }

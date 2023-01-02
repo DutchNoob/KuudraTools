@@ -36,7 +36,6 @@ export const TYPE_TERROR = 2
 export const TYPE_FERVOR = 3
 
 
-export const getHypixelPlayer = (uuid, apiKey) => request(`https://api.hypixel.net/player?key=${apiKey}&uuid=${uuid}`).then(a => JSON.parse(a)).catch(e => null)
 export const getSbProfiles = (uuid, apiKey) => request(`https://api.hypixel.net/skyblock/profiles?key=${apiKey}&uuid=${uuid}`).then(a => JSON.parse(a)).catch(e => null)
 export const getRecentProfile = (uuid, profiles=null, apiKey=null) => {
     uuid = uuid.replace(/-/g, "")

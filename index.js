@@ -8,7 +8,8 @@ import { getLowestPriceForAttributes, getLowestPriceForAttributeLevel, getShardP
 
 
 
-const CMDTAG = "kuudra"
+const CMDTAG = "kuudratools"
+const CMDALIAS = "kt"
 
 register("command", (...args) => 
 {
@@ -50,7 +51,7 @@ register("command", (...args) =>
 		return
 	}
 	showHelp()
-}).setName(CMDTAG)
+}).setName(CMDTAG).setAliases(CMDALIAS)
 
 function showHelp() {
 	ChatLib.chat("")

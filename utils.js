@@ -29,6 +29,7 @@ export const AUCTION_UUID = 0
 export const AUCTION_NAME = 1
 export const AUCTION_PRICE = 2
 export const AUCTION_LORE = 3
+export const AUCTION_EXTRA_ATTRIBUTES = 4
 
 export const TYPE_AURORA = 0
 export const TYPE_CRIMSON = 1

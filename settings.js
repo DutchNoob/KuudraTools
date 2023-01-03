@@ -1,6 +1,7 @@
 import {
     @TextProperty,
 	@SliderProperty,
+	@SwitchProperty,
     @Vigilant,
 } from '../Vigilance/index';
 
@@ -32,12 +33,21 @@ class Settings {
 	
     @SliderProperty({
         name: "Number of auctions to show",
-        description: "Pick a Size (default 10)",
+        description: "(default 10)",
         min: 1,
         max: 50,
         category: "General",
     })
     numberOfAuctions = 10;
 
+    @SliderProperty({
+        name: "Time between auction updates ",
+        description: "Value in minutes (default 10)",
+        min: 1,
+        max: 60,
+        category: "General",
+    })
+    auctionUpdateInterval = 10;
 }
+
 export default new Settings    

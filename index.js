@@ -4,7 +4,7 @@ import { COLOR_DARK_PURPLE, COLOR_GOLD, COLOR_GRAY, COLOR_DARK_GRAY, COLOR_BLUE,
 import { COLOR_RED, COLOR_LIGHT_PURPLE, COLOR_YELLOW, COLOR_WHITE } from "./utils"
 import { FORMAT_OBFUSCATED, FORMAT_BOLD, FORMAT_STRIKETHROUGH, FORMAT_UNDERLINE, FORMAT_ITALIC, FORMAT_RESET } from "./utils"
 import { getPlayerInfo } from "./playerinfo"
-import { getLowestPriceForAttributes, getLowestPriceForAttributeLevel, getShardPrices, isValidAttribute, showValidAttribute } from "./priceinfo"
+import { getLowestPriceForAttributes, getLowestPriceForAttributeLevel, getShardPrices, isValidAttribute, showValidAttribute, getAuctionsFromServer } from "./priceinfo"
 
 
 
@@ -19,6 +19,10 @@ register("command", (...args) =>
 	}
 	if (args[0].equals("settings")) {
 		settings.openGUI()
+		return
+	}
+	if (args[0].equals("update")) {
+		getAuctionsFromServer()
 		return
 	}
 	if (args[0].equals("price")) {
@@ -66,4 +70,6 @@ function showHelp() {
 	ChatLib.chat(COLOR_GOLD + `attributes + attributes: ` + COLOR_GRAY + `returns lowest per type`);
 	ChatLib.chat(COLOR_GOLD + `attributes + level: ` + COLOR_GRAY + `returns cheapest auctions`);
 	ChatLib.chat(COLOR_GOLD + `attributes: ` + COLOR_GRAY + showValidAttribute());
+	ChatLib.chat(COLOR_GREEN + `Forced(/manual) auctions update: `)
+	ChatLib.chat(COLOR_AQUA + `/` + CMDTAG + ` update`);
 }

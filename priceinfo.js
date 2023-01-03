@@ -5,19 +5,18 @@ import { COLOR_DARK_BLACK, COLOR_DARK_BLUE, COLOR_DARK_GREEN, COLOR_DARK_AQUA, C
 import { COLOR_DARK_PURPLE, COLOR_GOLD, COLOR_GRAY, COLOR_DARK_GRAY, COLOR_BLUE, COLOR_GREEN, COLOR_AQUA } from "./utils"
 import { COLOR_RED, COLOR_LIGHT_PURPLE, COLOR_YELLOW, COLOR_WHITE } from "./utils"
 import { FORMAT_OBFUSCATED, FORMAT_BOLD, FORMAT_STRIKETHROUGH, FORMAT_UNDERLINE, FORMAT_ITALIC, FORMAT_RESET } from "./utils"
-import { AUCTION_UUID, AUCTION_NAME, AUCTION_PRICE, AUCTION_LORE} from "./utils"
+import { AUCTION_UUID, AUCTION_NAME, AUCTION_PRICE, AUCTION_LORE, AUCTION_EXTRA_ATTRIBUTES } from "./utils"
 import { TYPE_AURORA, TYPE_CRIMSON, TYPE_TERROR, TYPE_FERVOR} from "./utils"
 
 
 
 var mPage = 0;
-var mTierSelected
-var mTypesSelected
+var mLastUpdateFromServer = 0
+var mLastUpdate = 0
 
-const mSearchType_DUAL = 0
-const mSearchType_LOWEST = 1
-const mSearchType_SHARDS = 2
-var mSearchType
+const SEARCHTYPE_DUAL = 0
+const SEARCHTYPE_LOWEST = 1
+const SEARCHTYPE_SHARDS = 2
 
 const validAttributes = [
 	["MP", "mana_pool"],
@@ -90,34 +89,24 @@ var equipmentList = [
 	["GAUNTLET_OF_CONTAGION", [], []]
 ]
 
+var mAuctions = []
+
 export function getLowestPriceForAttributes(types) {
-	mSearchType = mSearchType_DUAL
-	mTypesSelected = types
-	mTierSelected = 0
-	init()
-	ChatLib.chat(COLOR_GREEN + `Starting price info type ` + COLOR_DARK_PURPLE + types[0] + ` ` + types[1]);
-	parseAuctions()
+	initStructs()
+	getAuctions(SEARCHTYPE_DUAL, types, 0)
 }
 
 export function getLowestPriceForAttributeLevel(types, tier) {
-	mSearchType = mSearchType_LOWEST
-	mTypesSelected = types
-	mTierSelected = tier
-	init()
-	ChatLib.chat(COLOR_GREEN + `Starting price info type ` + COLOR_DARK_PURPLE  + types + ` tier ` + tier);
-	parseAuctions()
+	initStructs()
+	getAuctions(SEARCHTYPE_LOWEST, types, tier)
 }
 
 export function getShardPrices(tier) {
-	mSearchType = mSearchType_SHARDS
-	mTypesSelected = ""
-	mTierSelected = tier
-	init()
-	ChatLib.chat(COLOR_GREEN + `Starting price info ` + COLOR_DARK_PURPLE  + `tier ` + tier);
-	parseAuctions()
+	initStructs()
+	getAuctions(SEARCHTYPE_SHARDS, "", tier)
 }
 
-function init() {
+function initStructs() {
 	dualAttributesList.forEach(it => {
 		it[1] = [
 			[0, 0, 0, 0],
@@ -136,7 +125,12 @@ function init() {
 		it[1] = [0, 0, 0, 0]
 		it[2] = []
 	})
+}
+
+export function getAuctionsFromServer() {
+	mAuctions = []
 	mPage = 0
+	parseAuctions()
 }
 
 function parseAuctions() {
@@ -147,7 +141,7 @@ function parseAuctions() {
 		if (!obj.success) {
 			return false
 		}
-		obj.auctions.forEach(function(auction) {
+		obj.auctions.forEach(auction => {
 			let itemNBT  = decompress(auction.item_bytes)
 			let itemObj = itemNBT.toObject().i
 			if (itemObj.length == 1 && auction.bin) {
@@ -156,67 +150,23 @@ function parseAuctions() {
 					lore += itemObj[0].tag.display.Lore[j] + "\n"
 				}
 				if (auction.item_name.equals("Attribute Shard")) {
-					shardList.forEach(it => {
-						if (checkAttributePresent(itemObj[0], it[0]) == 1) {
-							it[2].push([auction.uuid, auction.item_name, auction.starting_bid, lore])
-						}
-					})
+					if (checkAnyValidAttributePresent(itemObj[0])) {
+						mAuctions.push([auction.uuid, auction.item_name, auction.starting_bid, lore, itemObj[0].tag.ExtraAttributes])
+					}
 				}
 				if (armorpieces.some(s => auction.item_name.includes(s))) {
-					var add = checkAttributePresent(itemObj[0], mTypesSelected)
-					var wantedLevel = 1
-					if (mTierSelected == 0) {
-						wantedLevel = 2
-					}
-					if (add == wantedLevel) {
-						if (mTierSelected != 0) {
-							tierOnlyList.forEach(it => {
-								if (auction.item_name.includes(it[0])) {
-									it[1].push([auction.uuid, auction.item_name, auction.starting_bid, lore])
-								}
-							})
-						} else {
-							dualAttributesList.forEach(it => {
-								if (auction.item_name.includes(it[0])) {
-									if (auction.item_name.includes("Crimson")) {
-										if (auction.starting_bid < it[1][TYPE_CRIMSON][AUCTION_PRICE] || it[1][TYPE_CRIMSON][AUCTION_PRICE] == 0) {
-											it[1][TYPE_CRIMSON] = [auction.uuid, auction.item_name, auction.starting_bid, lore]
-										}
-									} else if (auction.item_name.includes("Terror")) {
-										if (auction.starting_bid < it[1][TYPE_TERROR][AUCTION_PRICE] || it[1][TYPE_TERROR][AUCTION_PRICE] == 0) {
-											it[1][TYPE_TERROR] = [auction.uuid, auction.item_name, auction.starting_bid, lore]
-										}
-									} else if (auction.item_name.includes("Aurora")) {
-										if (auction.starting_bid < it[1][TYPE_AURORA][AUCTION_PRICE] || it[1][TYPE_AURORA][AUCTION_PRICE] == 0) {
-											it[1][TYPE_AURORA] = [auction.uuid, auction.item_name, auction.starting_bid, lore]
-										}
-									} else {
-										if (auction.starting_bid < it[1][TYPE_FERVOR][AUCTION_PRICE] || it[1][TYPE_FERVOR][AUCTION_PRICE] == 0) {
-											it[1][TYPE_FERVOR] = [auction.uuid, auction.item_name, auction.starting_bid, lore]
-										}
-									}
-								}
-							})
-						}
+					if (checkAnyValidAttributePresent(itemObj[0])) {
+						mAuctions.push([auction.uuid, auction.item_name, auction.starting_bid, lore, itemObj[0].tag.ExtraAttributes])
 					}
 				}
-				equipmentList.forEach(it => {
+				equipmentList.every(it => {
 					if (itemObj[0].tag.ExtraAttributes.id.includes(it[0])) {
-						var add = checkAttributePresent(itemObj[0], mTypesSelected)
-						var wantedLevel = 1
-						if (mTierSelected == 0) {
-							wantedLevel = 2
-						}
-						if (add == wantedLevel) {
-							if (mTierSelected != 0) {
-								it[2].push([auction.uuid, auction.item_name, auction.starting_bid, lore])
-							} else {
-								if (auction.starting_bid < it[1][AUCTION_PRICE] || it[1][AUCTION_PRICE] == 0) {
-									it[1] = [auction.uuid, auction.item_name, auction.starting_bid, lore]
-								}
-							}
+						if (checkAnyValidAttributePresent(itemObj[0])) {
+							mAuctions.push([auction.uuid, auction.item_name, auction.starting_bid, lore, itemObj[0].tag.ExtraAttributes])
+							return false
 						}
 					}
+					return true
 				})
 			}
 		})
@@ -228,124 +178,216 @@ function parseAuctions() {
 			parseAuctions()
 			return
 		}
-		if (mSearchType == mSearchType_LOWEST) {
-			ChatLib.chat(FORMAT_OBFUSCATED + FORMAT_BOLD + `!!!` + FORMAT_RESET +
-				COLOR_AQUA +` Auctions for ` + COLOR_DARK_PURPLE + FORMAT_BOLD + mTypesSelected + ` ` + mTierSelected + ` ` +
-				FORMAT_RESET + FORMAT_OBFUSCATED + FORMAT_BOLD + `!!!`)
-			shardList.forEach(it => {
-				var i = 0
-				if (it[0].equals(mTypesSelected)) {
-					it[2].sort((a, b) => a[AUCTION_PRICE] - b[AUCTION_PRICE])
-					it[2].every(function(it2) {
-						new Message(
-							new TextComponent(COLOR_AQUA + `Attribute Shard ` + it[0] + ` ` + mTierSelected + ` ` + COLOR_YELLOW + (it2[AUCTION_PRICE] / 1000000).toFixed(2) + `m`)
-								.setHover("show_text", it2[AUCTION_LORE])
-								.setClick("run_command","/viewauction " + it2[AUCTION_UUID])
-						).chat()
-						i += 1
-						if (i > settings.numberOfAuctions) { return false }
-						return true
-					})
-					ChatLib.chat("")
-				}
-			})
-			tierOnlyList.forEach(it => {
-				var i = 0
-				it[1].sort((a, b) => a[AUCTION_PRICE] - b[AUCTION_PRICE])
-				it[1].every(function(it2) {
-					new Message(
-						new TextComponent(COLOR_AQUA + it2[AUCTION_NAME] + ` ` + COLOR_YELLOW + (it2[AUCTION_PRICE] / 1000000).toFixed(2) + `m`)
-							.setHover("show_text", it2[AUCTION_LORE])
-							.setClick("run_command","/viewauction " + it2[AUCTION_UUID])
-					).chat()
-					i += 1
-					if (i > settings.numberOfAuctions) { return false }
-					return true
-				})
-				ChatLib.chat("")
-			})
-			equipmentList.forEach(it => {
-				var i = 0
-				it[2].sort((a, b) => a[AUCTION_PRICE] - b[AUCTION_PRICE])
-				it[2].every(function(it2) {
-					new Message(
-						new TextComponent(COLOR_AQUA + it2[AUCTION_NAME] + ` ` + COLOR_YELLOW + (it2[AUCTION_PRICE] / 1000000).toFixed(2) + `m`)
-							.setHover("show_text", it2[AUCTION_LORE])
-							.setClick("run_command","/viewauction " + it2[AUCTION_UUID])
-					).chat()
-					i += 1
-					if (i > settings.numberOfAuctions) { return false }
-					return true
-				})
-				ChatLib.chat("")
-			})
-			initStructs()
-			return
-		}
-		if (mSearchType == mSearchType_SHARDS) {
-			ChatLib.chat(FORMAT_OBFUSCATED + FORMAT_BOLD + `!!!` + FORMAT_RESET +
-				COLOR_AQUA +` Auctions for ` + COLOR_DARK_PURPLE + FORMAT_BOLD + `Tier ` + mTierSelected + ` ` +
-				FORMAT_RESET + FORMAT_OBFUSCATED + FORMAT_BOLD + `!!!`)
-			shardList.forEach(it => {
-				var i = 0
-				it[2].sort((a, b) => a[AUCTION_PRICE] - b[AUCTION_PRICE])
-				it[2].every(function(it2) {
-					new Message(
-						new TextComponent(COLOR_AQUA + `Attribute Shard ` + it[0] + ` ` + mTierSelected + ` ` + COLOR_YELLOW + (it2[AUCTION_PRICE] / 1000000).toFixed(2) + `m`)
-							.setHover("show_text", it2[AUCTION_LORE])
-							.setClick("run_command","/viewauction " + it2[AUCTION_UUID])
-					).chat()
-					i += 1
-					if (i > settings.numberOfAuctions) { return false }
-					return true
-				})
-				ChatLib.chat("")
-			})
-			initStructs()
-			return
-		}
-		ChatLib.chat(FORMAT_OBFUSCATED + FORMAT_BOLD + `!!!` + FORMAT_RESET +
-			COLOR_AQUA +` Auctions for ` + COLOR_DARK_PURPLE + FORMAT_BOLD + mTypesSelected[0] + ` ` + mTypesSelected[1] + ` ` +
-			FORMAT_RESET + FORMAT_OBFUSCATED + FORMAT_BOLD + `!!!`)
-		dualAttributesList.forEach(it => {
-			for (let i = 0; i < 4; i++) {
-				if (it[1][i][AUCTION_PRICE] != 0) {
-					var it2 = it[1][i]
-					new Message(
-						new TextComponent(COLOR_AQUA + it2[AUCTION_NAME] + ` ` + COLOR_YELLOW + (it2[AUCTION_PRICE] / 1000000).toFixed(2) + `m`)
-							.setHover("show_text", it2[AUCTION_LORE])
-							.setClick("run_command","/viewauction " + it2[AUCTION_UUID])
-					).chat()
-				}
-			}
-			ChatLib.chat("")
-		})
-		equipmentList.forEach(it => {
-			if (it[1][AUCTION_PRICE] != 0) {
-				new Message(
-					new TextComponent(COLOR_AQUA + it[1][AUCTION_NAME] + ` ` + COLOR_YELLOW + (it[1][AUCTION_PRICE] / 1000000).toFixed(2) + `m`)
-						.setHover("show_text", it[1][AUCTION_LORE])
-						.setClick("run_command","/viewauction " + it[1][AUCTION_UUID])
-				).chat()
-				ChatLib.chat("")
-			}
-		})
-		initStructs()
-		return
+		mLastUpdateFromServer = obj.lastUpdated
+		ChatLib.chat(COLOR_GREEN + `Done ` + mAuctions.length + ` found`);
+		mLastUpdate = new Date()
     })
 	.catch(function(error) {
-		initStructs()
         print(error);
     })
 }
 
-function checkAttributePresent(obj, selectedTypes) {
+function getLastUpdateString() {
+	return new Date(mLastUpdateFromServer).toLocaleTimeString("en-US")
+}
+
+function getAuctions(searchType, typesSelected, tierSelected) {
+	var seconds = Math.floor((new Date() - mLastUpdate) / 1000);
+	if (seconds > (settings.auctionUpdateInterval * 60) || mLastUpdate == 0) {
+		ChatLib.chat(COLOR_GREEN + `Auctions out of date, refreshing`);
+		getAuctionsFromServer()
+		return
+	}
+	mAuctions.forEach(auction => {
+		if (auction[AUCTION_NAME].equals("Attribute Shard")) {
+			shardList.forEach(it => {
+				if (checkAttributePresent(auction, it[0], tierSelected) == 1) {
+					it[2].push([auction[AUCTION_UUID], auction[AUCTION_NAME], auction[AUCTION_PRICE], auction[AUCTION_LORE]])
+				}
+			})
+		}
+		if (armorpieces.some(s => auction[AUCTION_NAME].includes(s))) {
+			var add = checkAttributePresent(auction, typesSelected, tierSelected)
+			var wantedLevel = 1
+			if (tierSelected == 0) {
+				wantedLevel = 2
+			}
+			if (add == wantedLevel) {
+				if (tierSelected != 0) {
+					tierOnlyList.forEach(it => {
+						if (auction[AUCTION_NAME].includes(it[0])) {
+							it[1].push([auction[AUCTION_UUID], auction[AUCTION_NAME], auction[AUCTION_PRICE], auction[AUCTION_LORE]])
+						}
+					})
+				} else {
+					dualAttributesList.forEach(it => {
+						if (auction[AUCTION_NAME].includes(it[0])) {
+							if (auction[AUCTION_NAME].includes("Crimson")) {
+								if (auction[AUCTION_PRICE] < it[1][TYPE_CRIMSON][AUCTION_PRICE] || it[1][TYPE_CRIMSON][AUCTION_PRICE] == 0) {
+									it[1][TYPE_CRIMSON] = [auction[AUCTION_UUID], auction[AUCTION_NAME], auction[AUCTION_PRICE], auction[AUCTION_LORE]]
+								}
+							} else if (auction[AUCTION_NAME].includes("Terror")) {
+								if (auction[AUCTION_PRICE] < it[1][TYPE_TERROR][AUCTION_PRICE] || it[1][TYPE_TERROR][AUCTION_PRICE] == 0) {
+									it[1][TYPE_TERROR] = [auction[AUCTION_UUID], auction[AUCTION_NAME], auction[AUCTION_PRICE], auction[AUCTION_LORE]]
+								}
+							} else if (auction[AUCTION_NAME].includes("Aurora")) {
+								if (auction[AUCTION_PRICE] < it[1][TYPE_AURORA][AUCTION_PRICE] || it[1][TYPE_AURORA][AUCTION_PRICE] == 0) {
+									it[1][TYPE_AURORA] = [auction[AUCTION_UUID], auction[AUCTION_NAME], auction[AUCTION_PRICE], auction[AUCTION_LORE]]
+								}
+							} else {
+								if (auction[AUCTION_PRICE] < it[1][TYPE_FERVOR][AUCTION_PRICE] || it[1][TYPE_FERVOR][AUCTION_PRICE] == 0) {
+									it[1][TYPE_FERVOR] = [auction[AUCTION_UUID], auction[AUCTION_NAME], auction[AUCTION_PRICE], auction[AUCTION_LORE]]
+								}
+							}
+						}
+					})
+				}
+			}
+		}
+		equipmentList.forEach(it => {
+			if (auction[AUCTION_EXTRA_ATTRIBUTES].id.includes(it[0])) {
+				var add = checkAttributePresent(auction, typesSelected, tierSelected)
+				var wantedLevel = 1
+				if (tierSelected == 0) {
+					wantedLevel = 2
+				}
+				if (add == wantedLevel) {
+					if (tierSelected != 0) {
+						it[2].push([auction[AUCTION_UUID], auction[AUCTION_NAME], auction[AUCTION_PRICE], auction[AUCTION_LORE]])
+					} else {
+						if (auction[AUCTION_PRICE] < it[1][AUCTION_PRICE] || it[1][AUCTION_PRICE] == 0) {
+							it[1] = [auction[AUCTION_UUID], auction[AUCTION_NAME], auction[AUCTION_PRICE], auction[AUCTION_LORE]]
+						}
+					}
+				}
+			}
+		})
+	})
+	if (searchType == SEARCHTYPE_LOWEST) {
+		ChatLib.chat(FORMAT_OBFUSCATED + FORMAT_BOLD + `!!!` + FORMAT_RESET +
+			COLOR_AQUA + ` Auctions for ` + COLOR_DARK_PURPLE + FORMAT_BOLD + typesSelected + ` ` + tierSelected + ` ` +
+			FORMAT_RESET + `(` + COLOR_WHITE + getLastUpdateString() + `) ` +
+			FORMAT_RESET + FORMAT_OBFUSCATED + FORMAT_BOLD + `!!!`)
+		shardList.forEach(it => {
+			var i = 0
+			if (it[0].equals(typesSelected)) {
+				var found = false
+				it[2].sort((a, b) => a[AUCTION_PRICE] - b[AUCTION_PRICE])
+				it[2].every(function(it2) {
+					new Message(
+						new TextComponent(COLOR_AQUA + `Attribute Shard ` + it[0] + ` ` + tierSelected + ` ` + COLOR_YELLOW + (it2[AUCTION_PRICE] / 1000000).toFixed(2) + `m`)
+							.setHover("show_text", it2[AUCTION_LORE])
+							.setClick("run_command","/viewauction " + it2[AUCTION_UUID])
+					).chat()
+					i += 1
+					if (i > settings.numberOfAuctions) { return false }
+					found = true
+					return true
+				})
+				if (found) { ChatLib.chat("") }
+			}
+		})
+		tierOnlyList.forEach(it => {
+			var i = 0
+			var found = false
+			it[1].sort((a, b) => a[AUCTION_PRICE] - b[AUCTION_PRICE])
+			it[1].every(function(it2) {
+				new Message(
+					new TextComponent(COLOR_AQUA + it2[AUCTION_NAME] + ` ` + COLOR_YELLOW + (it2[AUCTION_PRICE] / 1000000).toFixed(2) + `m`)
+						.setHover("show_text", it2[AUCTION_LORE])
+						.setClick("run_command","/viewauction " + it2[AUCTION_UUID])
+				).chat()
+				i += 1
+				if (i > settings.numberOfAuctions) { return false }
+				found = true
+				return true
+			})
+			if (found) { ChatLib.chat("") }
+		})
+		equipmentList.forEach(it => {
+			var i = 0
+			var found = false
+			it[2].sort((a, b) => a[AUCTION_PRICE] - b[AUCTION_PRICE])
+			it[2].every(function(it2) {
+				new Message(
+					new TextComponent(COLOR_AQUA + it2[AUCTION_NAME] + ` ` + COLOR_YELLOW + (it2[AUCTION_PRICE] / 1000000).toFixed(2) + `m`)
+						.setHover("show_text", it2[AUCTION_LORE])
+						.setClick("run_command","/viewauction " + it2[AUCTION_UUID])
+				).chat()
+				i += 1
+				if (i > settings.numberOfAuctions) { return false }
+				found = true
+				return true
+			})
+			if (found) { ChatLib.chat("") }
+		})
+		initStructs()
+		return
+	}
+	if (searchType == SEARCHTYPE_SHARDS) {
+		ChatLib.chat(FORMAT_OBFUSCATED + FORMAT_BOLD + `!!!` + FORMAT_RESET +
+			COLOR_AQUA + ` Auctions for ` + COLOR_DARK_PURPLE + FORMAT_BOLD + `Tier ` + tierSelected + ` ` +
+			FORMAT_RESET + `(` + COLOR_WHITE + getLastUpdateString() + `) ` +
+			FORMAT_RESET + FORMAT_OBFUSCATED + FORMAT_BOLD + `!!!`)
+		shardList.forEach(it => {
+			var i = 0
+			var found = false
+			it[2].sort((a, b) => a[AUCTION_PRICE] - b[AUCTION_PRICE])
+			it[2].every(function(it2) {
+				new Message(
+					new TextComponent(COLOR_AQUA + `Attribute Shard ` + it[0] + ` ` + tierSelected + ` ` + COLOR_YELLOW + (it2[AUCTION_PRICE] / 1000000).toFixed(2) + `m`)
+						.setHover("show_text", it2[AUCTION_LORE])
+						.setClick("run_command","/viewauction " + it2[AUCTION_UUID])
+				).chat()
+				i += 1
+				if (i > settings.numberOfAuctions) { return false }
+				found = true
+				return true
+			})
+			if (found) { ChatLib.chat("") }
+		})
+		initStructs()
+		return
+	}
+	ChatLib.chat(FORMAT_OBFUSCATED + FORMAT_BOLD + `!!!` + FORMAT_RESET +
+		COLOR_AQUA + ` Auctions for ` + COLOR_DARK_PURPLE + FORMAT_BOLD + typesSelected[0] + ` ` + typesSelected[1] + ` ` +
+		FORMAT_RESET + `(` + COLOR_WHITE + getLastUpdateString() + `) ` +
+		FORMAT_RESET + FORMAT_OBFUSCATED + FORMAT_BOLD + `!!!`)
+	dualAttributesList.forEach(it => {
+		var found = false
+		for (let i = 0; i < 4; i++) {
+			if (it[1][i][AUCTION_PRICE] != 0) {
+				var it2 = it[1][i]
+				new Message(
+					new TextComponent(COLOR_AQUA + it2[AUCTION_NAME] + ` ` + COLOR_YELLOW + (it2[AUCTION_PRICE] / 1000000).toFixed(2) + `m`)
+						.setHover("show_text", it2[AUCTION_LORE])
+						.setClick("run_command","/viewauction " + it2[AUCTION_UUID])
+				).chat()
+				found = true
+			}
+		}
+		if (found) { ChatLib.chat("") }
+	})
+	equipmentList.forEach(it => {
+		if (it[1][AUCTION_PRICE] != 0) {
+			new Message(
+				new TextComponent(COLOR_AQUA + it[1][AUCTION_NAME] + ` ` + COLOR_YELLOW + (it[1][AUCTION_PRICE] / 1000000).toFixed(2) + `m`)
+					.setHover("show_text", it[1][AUCTION_LORE])
+					.setClick("run_command","/viewauction " + it[1][AUCTION_UUID])
+			).chat()
+			ChatLib.chat("")
+		}
+	})
+	initStructs()
+}
+
+function checkAttributePresent(auction, selectedTypes, tierSelected) {
 	var add = 0
-	if (obj && obj.tag  && obj.tag.ExtraAttributes && obj.tag.ExtraAttributes.attributes) {
+	if (auction[AUCTION_EXTRA_ATTRIBUTES] && auction[AUCTION_EXTRA_ATTRIBUTES].attributes) {
 		validAttributes.forEach(it => {
 			if (selectedTypes.includes(it[0])) {
-				if (obj.tag.ExtraAttributes.attributes.hasOwnProperty(it[1])) {
-					if (obj.tag.ExtraAttributes.attributes[it[1]] == mTierSelected || mTierSelected == 0) {
+				if (auction[AUCTION_EXTRA_ATTRIBUTES].attributes.hasOwnProperty(it[1])) {
+					if (auction[AUCTION_EXTRA_ATTRIBUTES].attributes[it[1]] == tierSelected || tierSelected == 0) {
 						add += 1
 					}
 				}
@@ -353,6 +395,20 @@ function checkAttributePresent(obj, selectedTypes) {
 		})
 	}
 	return add
+}
+
+function checkAnyValidAttributePresent(obj) {
+	var ret = false
+	if (obj && obj.tag  && obj.tag.ExtraAttributes && obj.tag.ExtraAttributes.attributes) {
+		validAttributes.every(it => {
+			if (obj.tag.ExtraAttributes.attributes.hasOwnProperty(it[1])) {
+				ret = true
+				return false
+			}
+			return true
+		})
+	}
+	return ret
 }
 
 export function isValidAttribute(attr) {

@@ -1,0 +1,5 @@
+[general]
+	number_of_auctions_to_show = 10
+	hypixel_api_key = ""
+	time_between_auction_updates_ = 10
+

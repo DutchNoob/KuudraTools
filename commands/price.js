@@ -1,18 +1,11 @@
-import settings from "./settings"
-import request from "../requestV2"
-import { decompress } from "./utils"
-import { COLOR_DARK_BLACK, COLOR_DARK_BLUE, COLOR_DARK_GREEN, COLOR_DARK_AQUA, COLOR_DARK_RED } from "./utils"
-import { COLOR_DARK_PURPLE, COLOR_GOLD, COLOR_GRAY, COLOR_DARK_GRAY, COLOR_BLUE, COLOR_GREEN, COLOR_AQUA } from "./utils"
-import { COLOR_RED, COLOR_LIGHT_PURPLE, COLOR_YELLOW, COLOR_WHITE } from "./utils"
-import { FORMAT_OBFUSCATED, FORMAT_BOLD, FORMAT_STRIKETHROUGH, FORMAT_UNDERLINE, FORMAT_ITALIC, FORMAT_RESET } from "./utils"
-import { AUCTION_UUID, AUCTION_NAME, AUCTION_PRICE, AUCTION_LORE, AUCTION_EXTRA_ATTRIBUTES } from "./utils"
-import { TYPE_AURORA, TYPE_CRIMSON, TYPE_TERROR, TYPE_FERVOR} from "./utils"
+import settings from "../settings"
+import request from "../../requestV2"
+import * as utils from "../utils/utils"
+import constants from "../utils/constants.json"
 
-
-
-var mPage = 0;
-var mLastUpdateFromServer = 0
-var mLastUpdate = 0
+var page = 0;
+var lastAPIUpdate = 0
+var lastUpdate = 0
 
 const SEARCHTYPE_DUAL = 0
 const SEARCHTYPE_LOWEST = 1
@@ -129,12 +122,12 @@ function initStructs() {
 
 export function getAuctionsFromServer() {
 	mAuctions = []
-	mPage = 0
+	page = 0
 	parseAuctions()
 }
 
 function parseAuctions() {
-	var url = `https://api.hypixel.net/skyblock/auctions?page=` + mPage
+	var url = `https://api.hypixel.net/skyblock/auctions?page=` + page
 	request({url: url, json: false})
     .then(function(response) {
         let obj = JSON.parse(response)
@@ -142,7 +135,7 @@ function parseAuctions() {
 			return false
 		}
 		obj.auctions.forEach(auction => {
-			let itemNBT  = decompress(auction.item_bytes)
+			let itemNBT  = utils.decompress(auction.item_bytes)
 			let itemObj = itemNBT.toObject().i
 			if (itemObj.length == 1 && auction.bin) {
 				var lore = itemObj[0].tag.display.Name + "\n"
@@ -170,17 +163,17 @@ function parseAuctions() {
 				})
 			}
 		})
-		if (mPage % 10 == 0) {
-			ChatLib.chat(COLOR_GREEN + `Working ` + obj.page + `/` + obj.totalPages);
+		if (page % 10 == 0) {
+			ChatLib.chat(constants.color.green + `Working ` + obj.page + `/` + obj.totalPages);
 		}
-		mPage += 1
+		page += 1
 		if (obj.page < obj.totalPages - 1) {
 			parseAuctions()
 			return
 		}
-		mLastUpdateFromServer = obj.lastUpdated
-		ChatLib.chat(COLOR_GREEN + `Done ` + mAuctions.length + ` found`);
-		mLastUpdate = new Date()
+		lastAPIUpdate = obj.lastUpdated
+		ChatLib.chat(constants.color.green + `Done ` + mAuctions.length + ` found`);
+		lastUpdate = new Date()
     })
 	.catch(function(error) {
         print(error);
@@ -188,13 +181,13 @@ function parseAuctions() {
 }
 
 function getLastUpdateString() {
-	return new Date(mLastUpdateFromServer).toLocaleTimeString("en-US")
+	return new Date(lastAPIUpdate).toLocaleTimeString("en-US")
 }
 
 function getAuctions(searchType, typesSelected, tierSelected) {
-	var seconds = Math.floor((new Date() - mLastUpdate) / 1000);
-	if (seconds > (settings.auctionUpdateInterval * 60) || mLastUpdate == 0) {
-		ChatLib.chat(COLOR_GREEN + `Auctions out of date, refreshing`);
+	var seconds = Math.floor((new Date() - lastUpdate) / 1000);
+	if (seconds > (settings.auctionUpdateInterval * 60) || lastUpdate == 0) {
+		ChatLib.chat(constants.color.green + `Auctions out of date, refreshing`);
 		getAuctionsFromServer()
 		return
 	}
@@ -264,10 +257,10 @@ function getAuctions(searchType, typesSelected, tierSelected) {
 		})
 	})
 	if (searchType == SEARCHTYPE_LOWEST) {
-		ChatLib.chat(FORMAT_OBFUSCATED + FORMAT_BOLD + `!!!` + FORMAT_RESET +
-			COLOR_AQUA + ` Auctions for ` + COLOR_DARK_PURPLE + FORMAT_BOLD + typesSelected + ` ` + tierSelected + ` ` +
-			FORMAT_RESET + `(` + COLOR_WHITE + getLastUpdateString() + `) ` +
-			FORMAT_RESET + FORMAT_OBFUSCATED + FORMAT_BOLD + `!!!`)
+		ChatLib.chat(constants.format.OBFUSCATED + constants.format.BOLD + `!!!` + constants.format.RESET +
+			constants.color.AQUA + ` Auctions for ` + constants.color.DARK_PURPLE + constants.format.BOLD + typesSelected + ` ` + tierSelected + ` ` +
+			constants.format.RESET + `(` + constants.color.WHITE + getLastUpdateString() + `) ` +
+			constants.format.RESET + constants.format.OBFUSCATED + constants.format.BOLD + `!!!`)
 		shardList.forEach(it => {
 			var i = 0
 			if (it[0].equals(typesSelected)) {
@@ -275,7 +268,7 @@ function getAuctions(searchType, typesSelected, tierSelected) {
 				it[2].sort((a, b) => a[AUCTION_PRICE] - b[AUCTION_PRICE])
 				it[2].every(function(it2) {
 					new Message(
-						new TextComponent(COLOR_AQUA + `Attribute Shard ` + it[0] + ` ` + tierSelected + ` ` + COLOR_YELLOW + (it2[AUCTION_PRICE] / 1000000).toFixed(2) + `m`)
+						new TextComponent(constants.color.AQUA + `Attribute Shard ` + it[0] + ` ` + tierSelected + ` ` + constants.color.yellow + (it2[AUCTION_PRICE] / 1000000).toFixed(2) + `m`)
 							.setHover("show_text", it2[AUCTION_LORE])
 							.setClick("run_command","/viewauction " + it2[AUCTION_UUID])
 					).chat()
@@ -293,7 +286,7 @@ function getAuctions(searchType, typesSelected, tierSelected) {
 			it[1].sort((a, b) => a[AUCTION_PRICE] - b[AUCTION_PRICE])
 			it[1].every(function(it2) {
 				new Message(
-					new TextComponent(COLOR_AQUA + it2[AUCTION_NAME] + ` ` + COLOR_YELLOW + (it2[AUCTION_PRICE] / 1000000).toFixed(2) + `m`)
+					new TextComponent(constants.color.AQUA + it2[AUCTION_NAME] + ` ` + constants.color.yellow + (it2[AUCTION_PRICE] / 1000000).toFixed(2) + `m`)
 						.setHover("show_text", it2[AUCTION_LORE])
 						.setClick("run_command","/viewauction " + it2[AUCTION_UUID])
 				).chat()
@@ -310,7 +303,7 @@ function getAuctions(searchType, typesSelected, tierSelected) {
 			it[2].sort((a, b) => a[AUCTION_PRICE] - b[AUCTION_PRICE])
 			it[2].every(function(it2) {
 				new Message(
-					new TextComponent(COLOR_AQUA + it2[AUCTION_NAME] + ` ` + COLOR_YELLOW + (it2[AUCTION_PRICE] / 1000000).toFixed(2) + `m`)
+					new TextComponent(constants.color.AQUA + it2[AUCTION_NAME] + ` ` + constants.color.yellow + (it2[AUCTION_PRICE] / 1000000).toFixed(2) + `m`)
 						.setHover("show_text", it2[AUCTION_LORE])
 						.setClick("run_command","/viewauction " + it2[AUCTION_UUID])
 				).chat()
@@ -325,17 +318,17 @@ function getAuctions(searchType, typesSelected, tierSelected) {
 		return
 	}
 	if (searchType == SEARCHTYPE_SHARDS) {
-		ChatLib.chat(FORMAT_OBFUSCATED + FORMAT_BOLD + `!!!` + FORMAT_RESET +
-			COLOR_AQUA + ` Auctions for ` + COLOR_DARK_PURPLE + FORMAT_BOLD + `Tier ` + tierSelected + ` ` +
-			FORMAT_RESET + `(` + COLOR_WHITE + getLastUpdateString() + `) ` +
-			FORMAT_RESET + FORMAT_OBFUSCATED + FORMAT_BOLD + `!!!`)
+		ChatLib.chat(constants.format.OBFUSCATED + constants.format.BOLD + `!!!` + constants.format.RESET +
+			constants.color.AQUA + ` Auctions for ` + constants.color.DARK_PURPLE + constants.format.BOLD + `Tier ` + tierSelected + ` ` +
+			constants.format.RESET + `(` + constants.color.WHITE + getLastUpdateString() + `) ` +
+			constants.format.RESET + constants.format.OBFUSCATED + constants.format.BOLD + `!!!`)
 		shardList.forEach(it => {
 			var i = 0
 			var found = false
 			it[2].sort((a, b) => a[AUCTION_PRICE] - b[AUCTION_PRICE])
 			it[2].every(function(it2) {
 				new Message(
-					new TextComponent(COLOR_AQUA + `Attribute Shard ` + it[0] + ` ` + tierSelected + ` ` + COLOR_YELLOW + (it2[AUCTION_PRICE] / 1000000).toFixed(2) + `m`)
+					new TextComponent(constants.color.AQUA + `Attribute Shard ` + it[0] + ` ` + tierSelected + ` ` + constants.color.yellow + (it2[AUCTION_PRICE] / 1000000).toFixed(2) + `m`)
 						.setHover("show_text", it2[AUCTION_LORE])
 						.setClick("run_command","/viewauction " + it2[AUCTION_UUID])
 				).chat()
@@ -349,17 +342,17 @@ function getAuctions(searchType, typesSelected, tierSelected) {
 		initStructs()
 		return
 	}
-	ChatLib.chat(FORMAT_OBFUSCATED + FORMAT_BOLD + `!!!` + FORMAT_RESET +
-		COLOR_AQUA + ` Auctions for ` + COLOR_DARK_PURPLE + FORMAT_BOLD + typesSelected[0] + ` ` + typesSelected[1] + ` ` +
-		FORMAT_RESET + `(` + COLOR_WHITE + getLastUpdateString() + `) ` +
-		FORMAT_RESET + FORMAT_OBFUSCATED + FORMAT_BOLD + `!!!`)
+	ChatLib.chat(constants.format.OBFUSCATED + constants.format.BOLD + `!!!` + constants.format.RESET +
+		constants.color.AQUA + ` Auctions for ` + constants.color.DARK_PURPLE + constants.format.BOLD + typesSelected[0] + ` ` + typesSelected[1] + ` ` +
+		constants.format.RESET + `(` + constants.color.WHITE + getLastUpdateString() + `) ` +
+		constants.format.RESET + constants.format.OBFUSCATED + constants.format.BOLD + `!!!`)
 	dualAttributesList.forEach(it => {
 		var found = false
 		for (let i = 0; i < 4; i++) {
 			if (it[1][i][AUCTION_PRICE] != 0) {
 				var it2 = it[1][i]
 				new Message(
-					new TextComponent(COLOR_AQUA + it2[AUCTION_NAME] + ` ` + COLOR_YELLOW + (it2[AUCTION_PRICE] / 1000000).toFixed(2) + `m`)
+					new TextComponent(constants.color.AQUA + it2[AUCTION_NAME] + ` ` + constants.color.yellow + (it2[AUCTION_PRICE] / 1000000).toFixed(2) + `m`)
 						.setHover("show_text", it2[AUCTION_LORE])
 						.setClick("run_command","/viewauction " + it2[AUCTION_UUID])
 				).chat()
@@ -371,7 +364,7 @@ function getAuctions(searchType, typesSelected, tierSelected) {
 	equipmentList.forEach(it => {
 		if (it[1][AUCTION_PRICE] != 0) {
 			new Message(
-				new TextComponent(COLOR_AQUA + it[1][AUCTION_NAME] + ` ` + COLOR_YELLOW + (it[1][AUCTION_PRICE] / 1000000).toFixed(2) + `m`)
+				new TextComponent(constants.color.AQUA + it[1][AUCTION_NAME] + ` ` + constants.color.yellow + (it[1][AUCTION_PRICE] / 1000000).toFixed(2) + `m`)
 					.setHover("show_text", it[1][AUCTION_LORE])
 					.setClick("run_command","/viewauction " + it[1][AUCTION_UUID])
 			).chat()

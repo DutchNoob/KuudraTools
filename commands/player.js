@@ -1,24 +1,18 @@
-import settings from "./settings"
-import { COLOR_DARK_BLACK, COLOR_DARK_BLUE, COLOR_DARK_GREEN, COLOR_DARK_AQUA, COLOR_DARK_RED } from "./utils"
-import { COLOR_DARK_PURPLE, COLOR_GOLD, COLOR_GRAY, COLOR_DARK_GRAY, COLOR_BLUE, COLOR_GREEN, COLOR_AQUA } from "./utils"
-import { COLOR_RED, COLOR_LIGHT_PURPLE, COLOR_YELLOW, COLOR_WHITE } from "./utils"
-import { FORMAT_OBFUSCATED, FORMAT_BOLD, FORMAT_STRIKETHROUGH, FORMAT_UNDERLINE, FORMAT_ITALIC, FORMAT_RESET } from "./utils"
-import { CHECK_OK, CHECK_NOK } from "./utils"
-import { getRecentProfile, getMojangInfo, decompress } from "./utils"
-
-
+import settings from "../settings"
+import constants from "../utils/constants.json"
+import * as utils from "../utils/utils"
 
 const kuudraTiers = {
-    "none": COLOR_DARK_GRAY + "Basic",
-    "hot": COLOR_GRAY + "Hot",
-    "burning": COLOR_YELLOW + "Burning",
-    "fiery": COLOR_RED + "Fiery",
-    "infernal": COLOR_DARK_RED + "Infernal"
+    "none": constants.color.DARK_GRAY + "Basic",
+    "hot": constants.color.GRAY + "Hot",
+    "burning": constants.color.yellow + "Burning",
+    "fiery": constants.color.RED + "Fiery",
+    "infernal": constants.color.DARK_RED + "Infernal"
 }
 
-export function getPlayerInfo(player) {
+export function getInfo(player) {
 	if (!settings.apiKey) {
-		ChatLib.chat(COLOR_RED + `ERROR: Please enter your Hypxel API key in ` + COLOR_AQUA + `/` + CMDTAG + ` settings`);
+		ChatLib.chat(constants.color.RED + `ERROR: Please enter your Hypxel API key in ` + constants.color.AQUA + `/` + CMDTAG + ` settings`);
 		return
 	}
 	var hasWitherImpactBlade = ""
@@ -30,16 +24,16 @@ export function getPlayerInfo(player) {
 	var hasLevel200Gdrag = 0
 	var bankAmount = 0
 
-    getMojangInfo(player).then(mojangInfo => {
-        if (!mojangInfo) return ChatLib.chat(COLOR_RED + `Error: No player found with that name!`)
+    utils.getMojangInfo(player).then(mojangInfo => {
+        if (!mojangInfo) return ChatLib.chat(constants.color.RED + `Error: No player found with that name!`)
         let {name, id} = mojangInfo
-		getRecentProfile(id, null, settings.apiKey).then(profile => {
+		utils.getRecentProfile(id, null, settings.apiKey).then(profile => {
 			if (profile == undefined || profile.members[id] == undefined || 
 				profile.members[id].inv_contents == undefined || profile.members[id].inv_contents.data == undefined) {
 				ChatLib.chat("&cERROR: user probably on wrong profile");
 				return
 			}
-			let invContentNBT  = decompress(profile.members[id].inv_contents.data)
+			let invContentNBT  = utils.decompress(profile.members[id].inv_contents.data)
 			let invObj = invContentNBT.toObject().i
 			for (let i = 0; i < invObj.length; i++) {
 				if (invObj[i] == undefined || invObj[i].tag == undefined || invObj[i].tag.ExtraAttributes == undefined) {
@@ -98,7 +92,7 @@ export function getPlayerInfo(player) {
 					}
 				}
 			}
-			let wardrobeContentsNBT  = decompress(profile.members[id].wardrobe_contents.data)
+			let wardrobeContentsNBT  = utils.decompress(profile.members[id].wardrobe_contents.data)
 			let wardrobeObj = wardrobeContentsNBT.toObject().i
 			for (let i = 0; i < wardrobeObj.length; i++) {
 				if (wardrobeObj[i] == undefined || wardrobeObj[i].tag == undefined || wardrobeObj[i].tag.ExtraAttributes == undefined) {
@@ -127,7 +121,7 @@ export function getPlayerInfo(player) {
 			let kuudraWeight = 0
 			let hoverStr = Object.keys(kuudraTiers).reduce((a, b) => {
 				if (!(b in data)) return a
-				a += `\n${kuudraTiers[b]}` + COLOR_WHITE + `: ` + COLOR_GREEN + `${data[b]}`
+				a += `\n${kuudraTiers[b]}` + constants.color.WHITE + `: ` + constants.color.green + `${data[b]}`
 				totalComps += data[b]
 				/*
 				 * Basic: 0.5
@@ -156,86 +150,86 @@ export function getPlayerInfo(player) {
 				return a
 			}, "&eKuudra tiers completed")
 			new Message(
-				new TextComponent(FORMAT_OBFUSCATED + FORMAT_BOLD + `!!!` + FORMAT_RESET +
-				COLOR_AQUA + FORMAT_BOLD + ` ${name} ` + FORMAT_RESET +
-				COLOR_DARK_PURPLE + `Weight: ` + COLOR_YELLOW + `${kuudraWeight} ` + 
-				COLOR_DARK_PURPLE + `Completions: ` + COLOR_YELLOW + `${totalComps} ` +
-				FORMAT_RESET + FORMAT_OBFUSCATED + FORMAT_BOLD + `!!!`).setHover("show_text", hoverStr)
+				new TextComponent(constants.format.OBFUSCATED + constants.format.BOLD + `!!!` + constants.format.RESET +
+				constants.color.AQUA + constants.format.BOLD + ` ${name} ` + constants.format.RESET +
+				constants.color.DARK_PURPLE + `Weight: ` + constants.color.yellow + `${kuudraWeight} ` + 
+				constants.color.DARK_PURPLE + `Completions: ` + constants.color.yellow + `${totalComps} ` +
+				constants.format.RESET + constants.format.OBFUSCATED + constants.format.BOLD + `!!!`).setHover("show_text", hoverStr)
 			).chat()
 			if (hasWitherImpactBlade) {
 				new Message(
-					new TextComponent(CHECK_OK + COLOR_GREEN + ` Wither impact weapon found`)
+					new TextComponent(CHECK_OK + constants.color.green + ` Wither impact weapon found`)
 						.setHover("show_text", hasWitherImpactBlade)
 				).chat()
 			} else {
 				new Message(
-					new TextComponent(CHECK_NOK + COLOR_RED + ` No wither impact weapon found!`)
+					new TextComponent(CHECK_NOK + constants.color.RED + ` No wither impact weapon found!`)
 				).chat()
 
 			}
 			if (hasTerminatorSE) {
 				new Message(
-					new TextComponent(CHECK_OK + COLOR_GREEN + ` Terminator (Soul eater)`)
+					new TextComponent(CHECK_OK + constants.color.green + ` Terminator (Soul eater)`)
 						.setHover("show_text", hasTerminatorSE)
 				).chat()
 			}
 			if (hasTerminatorFT) {
 				new Message(
-					new TextComponent(CHECK_OK + COLOR_GREEN + ` Terminator (Fatal tempo)`)
+					new TextComponent(CHECK_OK + constants.color.green + ` Terminator (Fatal tempo)`)
 						.setHover("show_text", hasTerminatorFT)
 				).chat()
 			}
 			if (hasTerminatorDuplex) {
 				new Message(
-					new TextComponent(CHECK_OK + COLOR_GREEN + ` Terminator (Duplex)`)
+					new TextComponent(CHECK_OK + constants.color.green + ` Terminator (Duplex)`)
 						.setHover("show_text", hasTerminatorDuplex)
 				).chat()
 			} else {
 				new Message(
-					new TextComponent(CHECK_NOK + COLOR_RED + ` No terminator (Duplex) found`)
+					new TextComponent(CHECK_NOK + constants.color.RED + ` No terminator (Duplex) found`)
 				).chat()
 			}
 			if (gyrokineticwand) {
 				new Message(
-					new TextComponent(CHECK_OK + COLOR_GREEN + ` Gyrokenetic wand`)
+					new TextComponent(CHECK_OK + constants.color.green + ` Gyrokenetic wand`)
 						.setHover("show_text", gyrokineticwand)
 				).chat()
 			} else {
 				new Message(
-					new TextComponent(CHECK_NOK + COLOR_RED + ` No gyrokenetic wand found`)
+					new TextComponent(CHECK_NOK + constants.color.RED + ` No gyrokenetic wand found`)
 				).chat()
 			}
 			if (hasPrecursorEye) {
 				new Message(
-					new TextComponent(CHECK_OK + COLOR_GREEN + ` Precursor eye`)
+					new TextComponent(CHECK_OK + constants.color.green + ` Precursor eye`)
 						.setHover("show_text", hasPrecursorEye)
 				).chat()
 			} else {
 				new Message(
-					new TextComponent(CHECK_NOK + COLOR_RED + ` No precursor eye`)
+					new TextComponent(CHECK_NOK + constants.color.RED + ` No precursor eye`)
 				).chat()
 			}
 			if (hasLevel200Gdrag) {
 				new Message(
-					new TextComponent(CHECK_OK + COLOR_GREEN + ` Level 200 Golden dragon(s)`)
+					new TextComponent(CHECK_OK + constants.color.green + ` Level 200 Golden dragon(s)`)
 						.setHover("show_text", hasLevel200Gdrag)
 				).chat()
 			} else {
 				new Message(
-					new TextComponent(CHECK_NOK + COLOR_RED + ` No level 200 Golden dragon found)`)
+					new TextComponent(CHECK_NOK + constants.color.RED + ` No level 200 Golden dragon found)`)
 				).chat()
 			}
 			if (bankAmount > 950000000) {
 				new Message(
-					new TextComponent(CHECK_OK + COLOR_GREEN + ` Bank amount: ` + (bankAmount / 1000000).toFixed(0) + `m`)
+					new TextComponent(CHECK_OK + constants.color.green + ` Bank amount: ` + (bankAmount / 1000000).toFixed(0) + `m`)
 						.setHover("show_text", bankAmount.toFixed(0))
 				).chat()
 			} else {
 				new Message(
-					new TextComponent(CHECK_NOK + COLOR_RED + ` Bank amount: ` + (bankAmount / 1000000).toFixed(0) + `m`)
+					new TextComponent(CHECK_NOK + constants.color.RED + ` Bank amount: ` + (bankAmount / 1000000).toFixed(0) + `m`)
 						.setHover("show_text", bankAmount.toFixed(0))
 				).chat()
 			}
-		}).catch(e => ChatLib.chat(COLOR_RED + `Error: ${e}`))
-	}).catch(e => ChatLib.chat(COLOR_RED + `Error: ${e}`))
+		}).catch(e => ChatLib.chat(constants.color.RED + `Error: ${e}`))
+	}).catch(e => ChatLib.chat(constants.color.RED + `Error: ${e}`))
 }

@@ -13,6 +13,7 @@ import { TYPE_AURORA, TYPE_CRIMSON, TYPE_TERROR, TYPE_FERVOR} from "./utils"
 var mPage = 0
 var mLastUpdateFromServer = 0
 var mLastUpdate = 0
+var mLastCmd = undefined
 
 const SEARCHTYPE_DUAL = 0
 const SEARCHTYPE_LOWEST = 1
@@ -181,6 +182,10 @@ function parseAuctions() {
 		mLastUpdateFromServer = obj.lastUpdated
 		ChatLib.chat(COLOR_GREEN + `Done ` + mAuctions.length + ` found`)
 		mLastUpdate = new Date()
+		if (mLastCmd != undefined) {
+			getAuctions(mLastCmd[0], mLastCmd[1], mLastCmd[2])
+			mLastCmd = undefined
+		}
     })
 	.catch(function(error) {
         print(error)
@@ -196,6 +201,7 @@ function getAuctions(searchType, typesSelected, tierSelected) {
 	if (seconds > (settings.auctionUpdateInterval * 60) || mLastUpdate == 0) {
 		ChatLib.chat(COLOR_GREEN + `Auctions out of date, refreshing`)
 		getAuctionsFromServer()
+		mLastCmd = [searchType, typesSelected, tierSelected]
 		return
 	}
 	mAuctions.forEach(auction => {

@@ -19,7 +19,7 @@ const kuudraTiers = {
 
 export function getPlayerInfo(player) {
 	if (!settings.apiKey) {
-		ChatLib.chat(COLOR_RED + `ERROR: Please enter your Hypxel API key in ` + COLOR_AQUA + `/` + CMDTAG + ` settings`);
+		ChatLib.chat(COLOR_RED + `ERROR: Please enter your Hypxel API key in ` + COLOR_AQUA + `/` + CMDTAG + ` settings`)
 		return
 	}
 	var hasWitherImpactBlade = ""
@@ -37,7 +37,7 @@ export function getPlayerInfo(player) {
 		getRecentProfile(id, null, settings.apiKey).then(profile => {
 			if (profile == undefined || profile.members[id] == undefined || 
 				profile.members[id].inv_contents == undefined || profile.members[id].inv_contents.data == undefined) {
-				ChatLib.chat("&cERROR: user probably on wrong profile");
+				ChatLib.chat("&cERROR: user probably on wrong profile")
 				return
 			}
 			let invContentNBT  = decompress(profile.members[id].inv_contents.data)

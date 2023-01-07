@@ -60,17 +60,17 @@ register("command", (...args) =>
 
 function showHelp() {
 	ChatLib.chat("")
-	ChatLib.chat(COLOR_YELLOW + FORMAT_BOLD + `KuudraTools v1.0.0`);
+	ChatLib.chat(COLOR_YELLOW + FORMAT_BOLD + `KuudraTools v1.0.0`)
 	ChatLib.chat(COLOR_GREEN + `Settings: `)
-	ChatLib.chat(COLOR_AQUA + `/` + CMDTAG + ` settings`);
+	ChatLib.chat(COLOR_AQUA + `/` + CMDTAG + ` settings`)
 	ChatLib.chat(COLOR_GREEN + `Player info: `)
-	ChatLib.chat(COLOR_AQUA + `/` + CMDTAG + ` player `+ COLOR_YELLOW + `[NAME]`);
+	ChatLib.chat(COLOR_AQUA + `/` + CMDTAG + ` player `+ COLOR_YELLOW + `[NAME]`)
 	ChatLib.chat(COLOR_GREEN + `Lowest Armor auctions: `)
-	ChatLib.chat(COLOR_AQUA + `/` + CMDTAG + ` price  ` + COLOR_YELLOW + `[ATTR1] [ATTR2]`);
-	ChatLib.chat(COLOR_GOLD + `level ` + COLOR_GRAY + `lowest shard prices for the tier`);
-	ChatLib.chat(COLOR_GOLD + `attributes + attributes: ` + COLOR_GRAY + `returns lowest per type`);
-	ChatLib.chat(COLOR_GOLD + `attributes + level: ` + COLOR_GRAY + `returns cheapest auctions`);
-	ChatLib.chat(COLOR_GOLD + `attributes: ` + COLOR_GRAY + showValidAttribute());
+	ChatLib.chat(COLOR_AQUA + `/` + CMDTAG + ` price  ` + COLOR_YELLOW + `[ATTR1] [ATTR2]`)
+	ChatLib.chat(COLOR_GOLD + `level ` + COLOR_GRAY + `lowest shard prices for the tier`)
+	ChatLib.chat(COLOR_GOLD + `attributes + attributes: ` + COLOR_GRAY + `returns lowest per type`)
+	ChatLib.chat(COLOR_GOLD + `attributes + level: ` + COLOR_GRAY + `returns cheapest auctions`)
+	ChatLib.chat(COLOR_GOLD + `attributes: ` + COLOR_GRAY + showValidAttribute())
 	ChatLib.chat(COLOR_GREEN + `Forced(/manual) auctions update: `)
-	ChatLib.chat(COLOR_AQUA + `/` + CMDTAG + ` update`);
+	ChatLib.chat(COLOR_AQUA + `/` + CMDTAG + ` update`)
 }

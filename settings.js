@@ -3,12 +3,12 @@ import {
 	@SliderProperty,
 	@SwitchProperty,
     @Vigilant,
-} from '../Vigilance/index';
+} from '../Vigilance/index'
 
 @Vigilant("KuudraTools", "KuudraTools", {
     getCategoryComparator: () => (a, b) => {
-        const categories = ["General"];
-        return categories.indexOf(a.name) - categories.indexOf(b.name);
+        const categories = ["General"]
+        return categories.indexOf(a.name) - categories.indexOf(b.name)
     }
 })
 class Settings {

@@ -10,7 +10,7 @@ import { TYPE_AURORA, TYPE_CRIMSON, TYPE_TERROR, TYPE_FERVOR} from "./utils"
 
 
 
-var mPage = 0;
+var mPage = 0
 var mLastUpdateFromServer = 0
 var mLastUpdate = 0
 
@@ -171,7 +171,7 @@ function parseAuctions() {
 			}
 		})
 		if (mPage % 10 == 0) {
-			ChatLib.chat(COLOR_GREEN + `Working ` + obj.page + `/` + obj.totalPages);
+			ChatLib.chat(COLOR_GREEN + `Working ` + obj.page + `/` + obj.totalPages)
 		}
 		mPage += 1
 		if (obj.page < obj.totalPages - 1) {
@@ -179,11 +179,11 @@ function parseAuctions() {
 			return
 		}
 		mLastUpdateFromServer = obj.lastUpdated
-		ChatLib.chat(COLOR_GREEN + `Done ` + mAuctions.length + ` found`);
+		ChatLib.chat(COLOR_GREEN + `Done ` + mAuctions.length + ` found`)
 		mLastUpdate = new Date()
     })
 	.catch(function(error) {
-        print(error);
+        print(error)
     })
 }
 
@@ -192,9 +192,9 @@ function getLastUpdateString() {
 }
 
 function getAuctions(searchType, typesSelected, tierSelected) {
-	var seconds = Math.floor((new Date() - mLastUpdate) / 1000);
+	var seconds = Math.floor((new Date() - mLastUpdate) / 1000)
 	if (seconds > (settings.auctionUpdateInterval * 60) || mLastUpdate == 0) {
-		ChatLib.chat(COLOR_GREEN + `Auctions out of date, refreshing`);
+		ChatLib.chat(COLOR_GREEN + `Auctions out of date, refreshing`)
 		getAuctionsFromServer()
 		return
 	}

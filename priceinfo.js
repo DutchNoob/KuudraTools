@@ -6,7 +6,7 @@ import { COLOR_DARK_PURPLE, COLOR_GOLD, COLOR_GRAY, COLOR_DARK_GRAY, COLOR_BLUE,
 import { COLOR_RED, COLOR_LIGHT_PURPLE, COLOR_YELLOW, COLOR_WHITE } from "./utils"
 import { FORMAT_OBFUSCATED, FORMAT_BOLD, FORMAT_STRIKETHROUGH, FORMAT_UNDERLINE, FORMAT_ITALIC, FORMAT_RESET } from "./utils"
 import { AUCTION_UUID, AUCTION_NAME, AUCTION_PRICE, AUCTION_LORE, AUCTION_EXTRA_ATTRIBUTES } from "./utils"
-import { TYPE_AURORA, TYPE_CRIMSON, TYPE_TERROR, TYPE_FERVOR} from "./utils"
+import { TYPE_AURORA, TYPE_CRIMSON, TYPE_TERROR, TYPE_FERVOR, TYPE_HOLLOW } from "./utils"
 
 
 
@@ -38,10 +38,11 @@ const validAttributes = [
 ]
 
 const armorpieces = [
-	"Crimson Boots", "Crimson Chestplate", "Crimson Leggings", "Crimson Helmet",
-	"Fervor Boots", "Fervor Chestplate", "Fervor Leggings", "Fervor Helmet",
-	"Aurora Boots", "Aurora Chestplate", "Aurora Leggings", "Aurora Helmet",
-	"Terror Boots", "Terror Chestplate", "Terror Leggings", "Terror Helmet"
+	["Crimson", TYPE_CRIMSON],
+	["Fervor", TYPE_FERVOR],
+	["Aurora", TYPE_AURORA],
+	["Terror", TYPE_TERROR],
+	["Hollow", TYPE_HOLLOW]
 ]
 
 var dualAttributesList = [
@@ -113,6 +114,7 @@ function initStructs() {
 			[0, 0, 0, 0],
 			[0, 0, 0, 0],
 			[0, 0, 0, 0],
+			[0, 0, 0, 0],
 			[0, 0, 0, 0]
 		]
 	})
@@ -155,7 +157,7 @@ function parseAuctions() {
 						mAuctions.push([auction.uuid, auction.item_name, auction.starting_bid, lore, itemObj[0].tag.ExtraAttributes])
 					}
 				}
-				if (armorpieces.some(s => auction.item_name.includes(s))) {
+				if (armorpieces.some(s => auction.item_name.includes(s[0]))) {
 					if (checkAnyValidAttributePresent(itemObj[0])) {
 						mAuctions.push([auction.uuid, auction.item_name, auction.starting_bid, lore, itemObj[0].tag.ExtraAttributes])
 					}
@@ -212,7 +214,7 @@ function getAuctions(searchType, typesSelected, tierSelected) {
 				}
 			})
 		}
-		if (armorpieces.some(s => auction[AUCTION_NAME].includes(s))) {
+		if (armorpieces.some(s => auction[AUCTION_NAME].includes(s[0]))) {
 			var add = checkAttributePresent(auction, typesSelected, tierSelected)
 			var wantedLevel = 1
 			if (tierSelected == 0) {
@@ -228,23 +230,13 @@ function getAuctions(searchType, typesSelected, tierSelected) {
 				} else {
 					dualAttributesList.forEach(it => {
 						if (auction[AUCTION_NAME].includes(it[0])) {
-							if (auction[AUCTION_NAME].includes("Crimson")) {
-								if (auction[AUCTION_PRICE] < it[1][TYPE_CRIMSON][AUCTION_PRICE] || it[1][TYPE_CRIMSON][AUCTION_PRICE] == 0) {
-									it[1][TYPE_CRIMSON] = [auction[AUCTION_UUID], auction[AUCTION_NAME], auction[AUCTION_PRICE], auction[AUCTION_LORE]]
+							armorpieces.forEach(a => {
+								if (auction[AUCTION_NAME].includes(a[0])) {
+									if (auction[AUCTION_PRICE] < it[1][a[1]][AUCTION_PRICE] || it[1][a[1]][AUCTION_PRICE] == 0) {
+										it[1][a[1]] = [auction[AUCTION_UUID], auction[AUCTION_NAME], auction[AUCTION_PRICE], auction[AUCTION_LORE]]
+									}
 								}
-							} else if (auction[AUCTION_NAME].includes("Terror")) {
-								if (auction[AUCTION_PRICE] < it[1][TYPE_TERROR][AUCTION_PRICE] || it[1][TYPE_TERROR][AUCTION_PRICE] == 0) {
-									it[1][TYPE_TERROR] = [auction[AUCTION_UUID], auction[AUCTION_NAME], auction[AUCTION_PRICE], auction[AUCTION_LORE]]
-								}
-							} else if (auction[AUCTION_NAME].includes("Aurora")) {
-								if (auction[AUCTION_PRICE] < it[1][TYPE_AURORA][AUCTION_PRICE] || it[1][TYPE_AURORA][AUCTION_PRICE] == 0) {
-									it[1][TYPE_AURORA] = [auction[AUCTION_UUID], auction[AUCTION_NAME], auction[AUCTION_PRICE], auction[AUCTION_LORE]]
-								}
-							} else {
-								if (auction[AUCTION_PRICE] < it[1][TYPE_FERVOR][AUCTION_PRICE] || it[1][TYPE_FERVOR][AUCTION_PRICE] == 0) {
-									it[1][TYPE_FERVOR] = [auction[AUCTION_UUID], auction[AUCTION_NAME], auction[AUCTION_PRICE], auction[AUCTION_LORE]]
-								}
-							}
+							})
 						}
 					})
 				}

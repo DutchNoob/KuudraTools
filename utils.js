@@ -35,6 +35,7 @@ export const TYPE_AURORA = 0
 export const TYPE_CRIMSON = 1
 export const TYPE_TERROR = 2
 export const TYPE_FERVOR = 3
+export const TYPE_HOLLOW = 4
 
 export const CMDTAG = "kuudratools"
 export const CMDALIAS = "kt"

@@ -4,6 +4,7 @@ import { COLOR_DARK_PURPLE, COLOR_GOLD, COLOR_GRAY, COLOR_DARK_GRAY, COLOR_BLUE,
 import { COLOR_RED, COLOR_LIGHT_PURPLE, COLOR_YELLOW, COLOR_WHITE } from "./utils"
 import { FORMAT_OBFUSCATED, FORMAT_BOLD, FORMAT_STRIKETHROUGH, FORMAT_UNDERLINE, FORMAT_ITALIC, FORMAT_RESET } from "./utils"
 import { CHECK_OK, CHECK_NOK } from "./utils"
+import { CMDTAG } from "./utils"
 import { getRecentProfile, getMojangInfo, decompress } from "./utils"
 
 

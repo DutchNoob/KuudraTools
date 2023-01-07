@@ -36,6 +36,9 @@ export const TYPE_CRIMSON = 1
 export const TYPE_TERROR = 2
 export const TYPE_FERVOR = 3
 
+export const CMDTAG = "kuudratools"
+export const CMDALIAS = "kt"
+
 
 export const getSbProfiles = (uuid, apiKey) => request(`https://api.hypixel.net/skyblock/profiles?key=${apiKey}&uuid=${uuid}`).then(a => JSON.parse(a)).catch(e => null)
 export const getRecentProfile = (uuid, profiles=null, apiKey=null) => {

@@ -3,6 +3,7 @@ import { COLOR_DARK_BLACK, COLOR_DARK_BLUE, COLOR_DARK_GREEN, COLOR_DARK_AQUA, C
 import { COLOR_DARK_PURPLE, COLOR_GOLD, COLOR_GRAY, COLOR_DARK_GRAY, COLOR_BLUE, COLOR_GREEN, COLOR_AQUA } from "./utils"
 import { COLOR_RED, COLOR_LIGHT_PURPLE, COLOR_YELLOW, COLOR_WHITE } from "./utils"
 import { FORMAT_OBFUSCATED, FORMAT_BOLD, FORMAT_STRIKETHROUGH, FORMAT_UNDERLINE, FORMAT_ITALIC, FORMAT_RESET } from "./utils"
+import { CMDTAG, CMDALIAS } from "./utils"
 import { getPlayerInfo } from "./playerinfo"
 import { getLowestPriceForAttributes, getLowestPriceForAttributeLevel, getShardPrices, isValidAttribute, showValidAttribute, getAuctionsFromServer } from "./priceinfo"
 
